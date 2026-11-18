@@ -145,6 +145,10 @@ mod tests {
             evaluate("6 ^ 2"),
             Err(CalcError::InvalidOperator("^".into()))
         );
+        assert_eq!(
+            evaluate("6 ** 2"),
+            Err(CalcError::InvalidOperator("**".into()))
+        );
     }
 
     #[test]
