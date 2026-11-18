@@ -1,43 +1,59 @@
 mod calculator;
-use std::io;
-use std::str::FromStr;
+use std::io::{self, BufRead, Write};
 
 fn main() {
-    let mut num_1_string = String::new();
-    let mut num_2_string = String::new();
-    let mut oper = String::new();
+    let args: Vec<String> = std::env::args().skip(1).collect();
+
+    if !args.is_empty() {
+        let expression = args.join(" ");
+        match calculator::evaluate(&expression) {
+            Ok(result) => println!("{result}"),
+            Err(err) => {
+                eprintln!("error: {err}");
+                std::process::exit(1);
+            }
+        }
+        return;
+    }
+
+    run_repl();
+}
+
+fn run_repl() {
     println!("Cli Calculator");
-    println!("Please input your first number:");
+    println!("Enter an expression like `3 + 4` (operators: + - * /). Type q to quit.");
 
-    io::stdin()
-        .read_line(&mut num_1_string)
-        .expect("Failed to read line");
+    let stdin = io::stdin();
+    let mut stdout = io::stdout();
 
-    println!("Please input your second number:");
+    loop {
+        print!("> ");
 
-    io::stdin()
-        .read_line(&mut num_2_string)
-        .expect("Failed to read line");
+        if stdout.flush().is_err() {
+            break;
+        }
 
-    println!("Please input your operator: (+, -, *, /)");
+        let mut line = String::new();
+        match stdin.lock().read_line(&mut line) {
+            Ok(0) => break,
+            Ok(_) => {}
+            Err(err) => {
+                eprintln!("error reading input: {err}");
+                break;
+            }
+        }
 
-    io::stdin()
-        .read_line(&mut oper)
-        .expect("Failed to read line");
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        if line.eq_ignore_ascii_case("q") || line.eq_ignore_ascii_case("quit") {
+            break;
+        }
 
-    let calc = calculator::calculate(
-        parse_number(&num_1_string),
-        parse_number(&num_2_string),
-        parse_operator(&oper),
-    );
-
-    println!("Your calculation: {}", calc);
-}
-
-fn parse_number(input: &String) -> f32 {
-    input.trim().parse::<f32>().unwrap()
-}
-
-fn parse_operator(input: &String) -> calculator::Operator {
-    calculator::Operator::from_str(input.trim()).unwrap()
+        match calculator::evaluate(line) {
+            Ok(result) => println!("{result}"),
+            Err(err) => eprintln!("error: {err}"),
+        }
+    }
 }
