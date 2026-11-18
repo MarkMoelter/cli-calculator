@@ -17,6 +17,7 @@ pub enum CalcError {
     InvalidOperator(String),
     DivideByZero,
     Overflow,
+    InvalidCharacter(char),
 }
 
 impl fmt::Display for CalcError {
@@ -31,6 +32,7 @@ impl fmt::Display for CalcError {
             }
             CalcError::DivideByZero => write!(f, "cannot divide by zero"),
             CalcError::Overflow => write!(f, "result is too large to represent"),
+            CalcError::InvalidCharacter(c) => write!(f, "`{c}` is not a valid character"),
         }
     }
 }
