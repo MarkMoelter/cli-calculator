@@ -1,4 +1,7 @@
 mod calculator;
+mod error;
+mod parser;
+mod tokenizer;
 use std::io::{self, BufRead, Write};
 
 fn main() {
@@ -6,7 +9,7 @@ fn main() {
 
     if !args.is_empty() {
         let expression = args.join(" ");
-        match calculator::evaluate(&expression) {
+        match parser::evaluate(&expression) {
             Ok(result) => println!("{result}"),
             Err(err) => {
                 eprintln!("error: {err}");
@@ -51,7 +54,7 @@ fn run_repl() {
             break;
         }
 
-        match calculator::evaluate(line) {
+        match parser::evaluate(line) {
             Ok(result) => println!("{result}"),
             Err(err) => eprintln!("error: {err}"),
         }

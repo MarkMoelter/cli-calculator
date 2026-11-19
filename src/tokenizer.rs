@@ -1,4 +1,6 @@
-use crate::calculator::{CalcError, Operator, parse_number};
+use std::fmt;
+
+use crate::{calculator::Operator, error::CalcError};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Token {
@@ -8,12 +10,25 @@ pub enum Token {
     RParen,
 }
 
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Token::Number(n) => write!(f, "{n}"),
+            Token::Op(op) => write!(f, "{op}"),
+            Token::LParen => write!(f, "("),
+            Token::RParen => write!(f, ")"),
+        }
+    }
+}
+
 pub fn tokenize(input: &str) -> Result<Vec<Token>, CalcError> {
     let mut tokens = Vec::new();
     let mut chars = input.chars().peekable();
 
     while let Some(&c) = chars.peek() {
-        if c.is_ascii_digit() || c == '.' {
+        if c.is_whitespace() {
+            chars.next();
+        } else if c.is_ascii_digit() || c == '.' {
             let mut text = String::new();
             while let Some(&d) = chars.peek() {
                 if d.is_ascii_digit() || d == '.' {
@@ -46,8 +61,19 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, CalcError> {
     Ok(tokens)
 }
 
+fn parse_number(input: &str) -> Result<f64, CalcError> {
+    input
+        .trim()
+        .parse::<f64>()
+        .ok()
+        .filter(|n| n.is_finite())
+        .ok_or_else(|| CalcError::InvalidNumber(input.trim().to_string()))
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::parser::evaluate;
+
     use super::*;
 
     #[test]
@@ -65,6 +91,22 @@ mod tests {
                 Token::Number(1.0),
                 Token::RParen,
             ])
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_characters() {
+        assert_eq!(evaluate("abc + 1"), Err(CalcError::InvalidCharacter('a')));
+        assert_eq!(evaluate("1 + inf"), Err(CalcError::InvalidCharacter('i')));
+        assert_eq!(evaluate("nan * 2"), Err(CalcError::InvalidCharacter('n')));
+        assert_eq!(evaluate("6 ^ 2"), Err(CalcError::InvalidCharacter('^')));
+    }
+
+    #[test]
+    fn rejects_scientific_notation() {
+        assert_eq!(
+            evaluate("1e308 * 10"),
+            Err(CalcError::InvalidCharacter('e'))
         );
     }
 }
