@@ -4,7 +4,7 @@ A command-line calculator written in Rust. It evaluates arithmetic expressions w
 
 ## Features
 
-- Operators: `+`, `-`, `*`, `/`
+- Operators: `+`, `-`, `*`, `/`. `%`
 - Standard precedence (`2 + 3 * 4` is `14`) and left-to-right evaluation (`10 - 3 - 2` is `5`)
 - Parentheses, nested to any depth: `(2 + 3) * 4`
 - Unary minus: `-3 + 1.5`, `2 - -3`, `-(2 + 3)`
@@ -73,11 +73,11 @@ Dependencies point one way (`error` <- `calculator` <- `tokenizer` <- `parser` <
 
 ### Grammar
 
-The parser has one function per rule. Each rule is built from the one below it, which is what gives `*` and `/` higher precedence than `+` and `-`:
+The parser has one function per rule. Each rule is built from the one below it, which is what gives `*`, `/`, and `%` higher precedence than `+` and `-`:
 
 ```
 expression = term   (("+" | "-") term)*
-term       = factor (("*" | "/") factor)*
+term       = factor (("*" | "/" | "%") factor)*
 factor     = "-" factor | NUMBER | "(" expression ")"
 ```
 

@@ -30,7 +30,9 @@ impl Parser {
 
     fn parse_term(&mut self) -> Result<f64, CalcError> {
         let mut value = self.parse_factor()?;
-        while let Some(Token::Op(op @ (Operator::Multiply | Operator::Divide))) = self.peek() {
+        while let Some(Token::Op(op @ (Operator::Multiply | Operator::Divide | Operator::Modulo))) =
+            self.peek()
+        {
             self.advance();
             let rhs = self.parse_factor()?;
             value = calculate(value, rhs, op)?;
@@ -87,6 +89,7 @@ mod tests {
         assert_eq!(evaluate("3 - 4"), Ok(-1.0));
         assert_eq!(evaluate("3 * 4"), Ok(12.0));
         assert_eq!(evaluate("12 / 4"), Ok(3.0));
+        assert_eq!(evaluate("12 % 5"), Ok(2.0));
     }
 
     #[test]
@@ -141,6 +144,7 @@ mod tests {
         assert_eq!(evaluate("(2 + 3) * 4"), Ok(20.0));
         assert_eq!(evaluate("10 - 3 - 2"), Ok(5.0)); // left associativity
         assert_eq!(evaluate("-(2 + 3)"), Ok(-5.0)); // unary minus on a group
+        assert_eq!(evaluate("(2 + 3) % 4"), Ok(1.0));
     }
 
     #[test]
@@ -156,10 +160,13 @@ mod tests {
         );
 
         // parser
-        assert_eq!(evaluate("*"), Err(CalcError::UnexpectedToken("*".into())));
+        assert_eq!(
+            evaluate("*"),
+            Err(CalcError::UnexpectedToken("*".to_string()))
+        );
         assert_eq!(
             evaluate("(2 * 5 4"),
-            Err(CalcError::UnexpectedToken("4".into()))
+            Err(CalcError::UnexpectedToken("4".to_string()))
         );
     }
 
