@@ -140,7 +140,8 @@ mod tests {
     }
 
     #[test]
-    fn rejects_unexpected_tokens_in_evaluate() {
+    fn rejects_unexpected_tokens() {
+        // evaluate
         assert_eq!(
             evaluate("2 3"),
             Err(CalcError::UnexpectedToken("3".to_string()))
@@ -148,33 +149,37 @@ mod tests {
         assert_eq!(
             evaluate("2 + 3)"),
             Err(CalcError::UnexpectedToken(")".to_string()))
-        )
+        );
+
+        // parser
+        assert_eq!(evaluate("*"), Err(CalcError::UnexpectedToken("*".into())));
+        assert_eq!(
+            evaluate("(2 * 5 4"),
+            Err(CalcError::UnexpectedToken("4".into()))
+        );
     }
 
     #[test]
-    fn rejects_unexpected_tokens_in_parse_factor() {
-        // TODO: Convert tokens vec to a param list so parser and assert statements dont need to be written each time
-        let tokens = vec![Token::Op(Operator::Multiply)];
-        let mut parser = Parser { tokens, pos: 0 };
-        assert_eq!(
-            parser.parse_factor(),
-            Err(CalcError::UnexpectedToken("*".to_string()))
-        );
+    fn rejects_incomplete_input_on_parse_factor() {
+        assert_eq!(evaluate(""), Err(CalcError::UnexpectedEnd)); // outer
+        assert_eq!(evaluate("1 +"), Err(CalcError::UnexpectedEnd)); // outer
+        assert_eq!(evaluate("("), Err(CalcError::UnexpectedEnd)); // outer, via the recursion
+        assert_eq!(evaluate("(2 + 3"), Err(CalcError::UnexpectedEnd)); // inner
+    }
 
-        let tokens2 = vec![
-            Token::LParen,
-            Token::Number(2.0),
-            Token::Op(Operator::Multiply),
-            Token::Number(5.0),
-            Token::Number(4.0),
-        ];
-        let mut parser = Parser {
-            tokens: tokens2,
-            pos: 0,
-        };
-        assert_eq!(
-            parser.parse_factor(),
-            Err(CalcError::UnexpectedToken("4".to_string()))
-        );
+    #[test]
+    fn operator_display() {
+        assert_eq!(Operator::Add.to_string(), "+");
+        assert_eq!(Operator::Subtract.to_string(), "-");
+        assert_eq!(Operator::Multiply.to_string(), "*");
+        assert_eq!(Operator::Divide.to_string(), "/");
+    }
+
+    #[test]
+    fn token_display() {
+        assert_eq!(Token::LParen.to_string(), "(");
+        assert_eq!(Token::RParen.to_string(), ")");
+        assert_eq!(Token::LParen.to_string(), "(");
+        assert_eq!(Token::LParen.to_string(), "(");
     }
 }

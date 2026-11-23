@@ -29,3 +29,37 @@ impl fmt::Display for CalcError {
 }
 
 impl Error for CalcError {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn error_messages() {
+        assert_eq!(
+            CalcError::UnexpectedToken("*".into()).to_string(),
+            "unexpected `*`"
+        );
+        assert_eq!(
+            CalcError::UnexpectedEnd.to_string(),
+            "unexpected end of input"
+        );
+        assert_eq!(CalcError::DivideByZero.to_string(), "cannot divide by zero");
+        assert_eq!(
+            CalcError::InvalidCharacter('~').to_string(),
+            "`~` is not a valid character"
+        );
+        assert_eq!(
+            CalcError::InvalidNumber("a".to_string()).to_string(),
+            "`a` is not a valid number"
+        );
+        assert_eq!(
+            CalcError::InvalidToken("~".to_string()).to_string(),
+            "`~` is not a valid operator (use +, -, *, /)"
+        );
+        assert_eq!(
+            CalcError::Overflow.to_string(),
+            "result is too large to represent"
+        )
+    }
+}
