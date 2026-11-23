@@ -36,6 +36,18 @@ impl fmt::Display for Operator {
     }
 }
 
+impl Operator {
+    pub fn from_char(c: char) -> Option<Operator> {
+        match c {
+            '+' => Some(Operator::Add),
+            '-' => Some(Operator::Subtract),
+            '*' => Some(Operator::Multiply),
+            '/' => Some(Operator::Divide),
+            _ => None,
+        }
+    }
+}
+
 pub fn calculate(num_1: f64, num_2: f64, operation: Operator) -> Result<f64, CalcError> {
     let res = match operation {
         Operator::Add => num_1 + num_2,

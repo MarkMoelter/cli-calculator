@@ -49,11 +49,13 @@ pub fn tokenize(input: &str) -> Result<Vec<Token>, CalcError> {
                     tokens.push(Token::RParen);
                     chars.next();
                 }
-                '+' | '-' | '*' | '/' => {
-                    tokens.push(Token::Op(c.to_string().parse()?));
-                    chars.next();
-                }
-                _ => return Err(CalcError::InvalidCharacter(c)),
+                _ => match Operator::from_char(c) {
+                    Some(op) => {
+                        tokens.push(Token::Op(op));
+                        chars.next();
+                    }
+                    None => return Err(CalcError::InvalidCharacter(c)),
+                },
             }
         }
     }
@@ -119,6 +121,10 @@ mod tests {
             parse_number("a"),
             Err(CalcError::InvalidNumber("a".to_string()))
         );
+        assert_eq!(
+            tokenize("1.2.3"),
+            Err(CalcError::InvalidNumber("1.2.3".to_string()))
+        )
     }
 
     #[test]
