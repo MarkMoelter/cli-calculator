@@ -20,7 +20,7 @@ impl fmt::Display for CalcError {
             CalcError::InvalidToken(s) => {
                 write!(f, "`{s}` is not a valid operator (use +, -, *, /)")
             }
-            CalcError::UnexpectedToken(s) => write!(f, "Unexpectedu `{s}`"),
+            CalcError::UnexpectedToken(s) => write!(f, "unexpected `{s}`"),
             CalcError::UnexpectedEnd => write!(f, "unexpected end of input"),
             CalcError::DivideByZero => write!(f, "cannot divide by zero"),
             CalcError::Overflow => write!(f, "result is too large to represent"),

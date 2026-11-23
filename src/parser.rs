@@ -71,8 +71,8 @@ pub fn evaluate(input: &str) -> Result<f64, CalcError> {
     let tokens = tokenize(input)?;
     let mut parser = Parser { tokens, pos: 0 };
     let value = parser.parse_expression()?;
-    if parser.pos != parser.tokens.len() {
-        return Err(CalcError::UnexpectedEnd);
+    if let Some(extra) = parser.peek() {
+        return Err(CalcError::UnexpectedToken(extra.to_string()));
     }
     Ok(value)
 }
@@ -87,7 +87,6 @@ mod tests {
         assert_eq!(evaluate("3 - 4"), Ok(-1.0));
         assert_eq!(evaluate("3 * 4"), Ok(12.0));
         assert_eq!(evaluate("12 / 4"), Ok(3.0));
-        // assert_eq!(evaluate("6 ** 2"), Ok(36.0));
     }
 
     #[test]
@@ -115,5 +114,67 @@ mod tests {
     }
 
     #[test]
-    fn parse_basic() {}
+    fn parse_basic_expressions() {
+        let tokens = vec![
+            Token::Number(6.0),
+            Token::Op(Operator::Add),
+            Token::Number(3.0),
+        ];
+        let mut parser = Parser { tokens, pos: 0 };
+        assert_eq!(parser.parse_expression(), Ok(9.0))
+    }
+
+    #[test]
+    fn handles_precedence() {
+        let tokens = vec![
+            Token::LParen,
+            Token::Number(6.0),
+            Token::Op(Operator::Add),
+            Token::Number(3.0),
+            Token::RParen,
+            Token::Op(Operator::Multiply),
+            Token::Number(4.0),
+        ];
+        let mut parser = Parser { tokens, pos: 0 };
+        assert_eq!(parser.parse_expression(), Ok(36.0))
+    }
+
+    #[test]
+    fn rejects_unexpected_tokens_in_evaluate() {
+        assert_eq!(
+            evaluate("2 3"),
+            Err(CalcError::UnexpectedToken("3".to_string()))
+        );
+        assert_eq!(
+            evaluate("2 + 3)"),
+            Err(CalcError::UnexpectedToken(")".to_string()))
+        )
+    }
+
+    #[test]
+    fn rejects_unexpected_tokens_in_parse_factor() {
+        // TODO: Convert tokens vec to a param list so parser and assert statements dont need to be written each time
+        let tokens = vec![Token::Op(Operator::Multiply)];
+        let mut parser = Parser { tokens, pos: 0 };
+        assert_eq!(
+            parser.parse_factor(),
+            Err(CalcError::UnexpectedToken("*".to_string()))
+        );
+
+        let tokens2 = vec![
+            Token::LParen,
+            Token::Number(2.0),
+            Token::Op(Operator::Multiply),
+            Token::Number(5.0),
+            Token::Number(4.0),
+        ];
+        let mut parser = Parser {
+            tokens: tokens2,
+            pos: 0,
+        };
+        assert_eq!(
+            parser.parse_factor(),
+            Err(CalcError::UnexpectedToken("4".to_string()))
+        );
+    }
 }

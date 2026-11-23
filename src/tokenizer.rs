@@ -72,7 +72,6 @@ fn parse_number(input: &str) -> Result<f64, CalcError> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::evaluate;
 
     use super::*;
 
@@ -96,17 +95,29 @@ mod tests {
 
     #[test]
     fn rejects_invalid_characters() {
-        assert_eq!(evaluate("abc + 1"), Err(CalcError::InvalidCharacter('a')));
-        assert_eq!(evaluate("1 + inf"), Err(CalcError::InvalidCharacter('i')));
-        assert_eq!(evaluate("nan * 2"), Err(CalcError::InvalidCharacter('n')));
-        assert_eq!(evaluate("6 ^ 2"), Err(CalcError::InvalidCharacter('^')));
+        assert_eq!(tokenize("abc + 1"), Err(CalcError::InvalidCharacter('a')));
+        assert_eq!(tokenize("1 + inf"), Err(CalcError::InvalidCharacter('i')));
+        assert_eq!(tokenize("nan * 2"), Err(CalcError::InvalidCharacter('n')));
+        assert_eq!(tokenize("6 ^ 2"), Err(CalcError::InvalidCharacter('^')));
     }
 
     #[test]
     fn rejects_scientific_notation() {
         assert_eq!(
-            evaluate("1e308 * 10"),
+            tokenize("1e308 * 10"),
             Err(CalcError::InvalidCharacter('e'))
+        );
+    }
+
+    #[test]
+    fn reject_invalid_numbers() {
+        assert_eq!(
+            parse_number("1.2.3"),
+            Err(CalcError::InvalidNumber("1.2.3".to_string()))
+        );
+        assert_eq!(
+            parse_number("a"),
+            Err(CalcError::InvalidNumber("a".to_string()))
         );
     }
 }
