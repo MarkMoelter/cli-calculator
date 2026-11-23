@@ -5,7 +5,6 @@ use std::fmt;
 pub enum CalcError {
     InvalidCharacter(char),
     InvalidNumber(String),
-    InvalidToken(String),
     UnexpectedToken(String),
     UnexpectedEnd,
     DivideByZero,
@@ -17,9 +16,6 @@ impl fmt::Display for CalcError {
         match self {
             CalcError::InvalidCharacter(c) => write!(f, "`{c}` is not a valid character"),
             CalcError::InvalidNumber(s) => write!(f, "`{s}` is not a valid number"),
-            CalcError::InvalidToken(s) => {
-                write!(f, "`{s}` is not a valid token")
-            }
             CalcError::UnexpectedToken(s) => write!(f, "unexpected `{s}`"),
             CalcError::UnexpectedEnd => write!(f, "unexpected end of input"),
             CalcError::DivideByZero => write!(f, "cannot divide by zero"),
@@ -54,12 +50,8 @@ mod tests {
             "`a` is not a valid number"
         );
         assert_eq!(
-            CalcError::InvalidToken("~".to_string()).to_string(),
-            "`~` is not a valid token"
-        );
-        assert_eq!(
             CalcError::Overflow.to_string(),
             "result is too large to represent"
-        )
+        );
     }
 }

@@ -1,4 +1,4 @@
-use std::{fmt, str::FromStr};
+use std::fmt;
 
 use crate::error::CalcError;
 
@@ -8,20 +8,6 @@ pub enum Operator {
     Subtract,
     Multiply,
     Divide,
-}
-
-impl FromStr for Operator {
-    type Err = CalcError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "+" => Ok(Operator::Add),
-            "-" => Ok(Operator::Subtract),
-            "*" => Ok(Operator::Multiply),
-            "/" => Ok(Operator::Divide),
-            _ => Err(CalcError::InvalidToken(s.to_string())),
-        }
-    }
 }
 
 impl fmt::Display for Operator {
@@ -71,12 +57,6 @@ pub fn calculate(num_1: f64, num_2: f64, operation: Operator) -> Result<f64, Cal
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn operator_parsing() {
-        assert_eq!("+".parse::<Operator>(), Ok(Operator::Add));
-        assert!("%".parse::<Operator>().is_err());
-    }
 
     #[test]
     fn detects_overflow() {
