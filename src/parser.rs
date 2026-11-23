@@ -115,17 +115,11 @@ mod tests {
 
     #[test]
     fn parse_basic_expressions() {
-        let tokens = vec![
-            Token::Number(6.0),
-            Token::Op(Operator::Add),
-            Token::Number(3.0),
-        ];
-        let mut parser = Parser { tokens, pos: 0 };
-        assert_eq!(parser.parse_expression(), Ok(9.0))
+        assert_eq!(evaluate("6 + 3"), Ok(9.0));
     }
 
     #[test]
-    fn handles_precedence() {
+    fn handles_parentheses() {
         let tokens = vec![
             Token::LParen,
             Token::Number(6.0),
@@ -137,6 +131,16 @@ mod tests {
         ];
         let mut parser = Parser { tokens, pos: 0 };
         assert_eq!(parser.parse_expression(), Ok(36.0))
+    }
+
+    #[test]
+    fn handles_precedence() {
+        assert_eq!(evaluate("2 + 3 * 4"), Ok(14.0));
+        assert_eq!(evaluate("2 * 3 + 4"), Ok(10.0));
+        assert_eq!(evaluate("2 * (3 + 4)"), Ok(14.0));
+        assert_eq!(evaluate("(2 + 3) * 4"), Ok(20.0));
+        assert_eq!(evaluate("10 - 3 - 2"), Ok(5.0)); // left associativity
+        assert_eq!(evaluate("-(2 + 3)"), Ok(-5.0)); // unary minus on a group
     }
 
     #[test]
@@ -165,21 +169,5 @@ mod tests {
         assert_eq!(evaluate("1 +"), Err(CalcError::UnexpectedEnd)); // outer
         assert_eq!(evaluate("("), Err(CalcError::UnexpectedEnd)); // outer, via the recursion
         assert_eq!(evaluate("(2 + 3"), Err(CalcError::UnexpectedEnd)); // inner
-    }
-
-    #[test]
-    fn operator_display() {
-        assert_eq!(Operator::Add.to_string(), "+");
-        assert_eq!(Operator::Subtract.to_string(), "-");
-        assert_eq!(Operator::Multiply.to_string(), "*");
-        assert_eq!(Operator::Divide.to_string(), "/");
-    }
-
-    #[test]
-    fn token_display() {
-        assert_eq!(Token::LParen.to_string(), "(");
-        assert_eq!(Token::RParen.to_string(), ")");
-        assert_eq!(Token::LParen.to_string(), "(");
-        assert_eq!(Token::LParen.to_string(), "(");
     }
 }

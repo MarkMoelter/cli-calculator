@@ -120,4 +120,12 @@ mod tests {
             Err(CalcError::InvalidNumber("a".to_string()))
         );
     }
+
+    #[test]
+    fn token_display() {
+        assert_eq!(Token::LParen.to_string(), "(");
+        assert_eq!(Token::RParen.to_string(), ")");
+        assert_eq!(Token::Number(5.0).to_string(), "5");
+        assert_eq!(Token::Op(Operator::Add).to_string(), "+");
+    }
 }

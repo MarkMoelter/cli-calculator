@@ -66,12 +66,19 @@ mod tests {
         assert!("%".parse::<Operator>().is_err());
     }
 
-    // calculator.rs
     #[test]
     fn detects_overflow() {
         assert_eq!(
             calculate(1e308, 10.0, Operator::Multiply),
             Err(CalcError::Overflow)
         );
+    }
+
+    #[test]
+    fn operator_display() {
+        assert_eq!(Operator::Add.to_string(), "+");
+        assert_eq!(Operator::Subtract.to_string(), "-");
+        assert_eq!(Operator::Multiply.to_string(), "*");
+        assert_eq!(Operator::Divide.to_string(), "/");
     }
 }

@@ -18,7 +18,7 @@ impl fmt::Display for CalcError {
             CalcError::InvalidCharacter(c) => write!(f, "`{c}` is not a valid character"),
             CalcError::InvalidNumber(s) => write!(f, "`{s}` is not a valid number"),
             CalcError::InvalidToken(s) => {
-                write!(f, "`{s}` is not a valid operator (use +, -, *, /)")
+                write!(f, "`{s}` is not a valid token")
             }
             CalcError::UnexpectedToken(s) => write!(f, "unexpected `{s}`"),
             CalcError::UnexpectedEnd => write!(f, "unexpected end of input"),
@@ -55,7 +55,7 @@ mod tests {
         );
         assert_eq!(
             CalcError::InvalidToken("~".to_string()).to_string(),
-            "`~` is not a valid operator (use +, -, *, /)"
+            "`~` is not a valid token"
         );
         assert_eq!(
             CalcError::Overflow.to_string(),
